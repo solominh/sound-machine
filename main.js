@@ -7,9 +7,10 @@ var configuration = require('./configuration');
 var mainWindow = null;
 let tray = null;
 var path = require('path');
+var url = require('url');
 
-app.on('ready', function () {
 
+function createMainWindow() {
   if (!configuration.readSettings('shortcutKeys')) {
     configuration.saveSettings('shortcutKeys', ['ctrl', 'shift']);
   }
@@ -23,7 +24,11 @@ app.on('ready', function () {
     width: 368
   });
 
-  mainWindow.loadURL('file://' + __dirname + '/app/index.html');
+  mainWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'app/index.html'),
+    protocol: 'file:',
+    slashes: true
+  }))
 
   setGlobalShortcuts();
 
@@ -38,47 +43,11 @@ app.on('ready', function () {
     { type: 'separator' },
     {
       label: 'Settings',
-      click: function () {
-        if (settingsWindow) {
-          settingsWindow.focus();
-          return;
-        }
-
-        settingsWindow = new BrowserWindow({
-          frame: false,
-          height: 220,
-          resizable: false,
-          width: 200
-        });
-
-        settingsWindow.loadURL('file://' + __dirname + '/app/settings.html');
-
-        settingsWindow.on('closed', function () {
-          settingsWindow = null;
-        });
-      }
-    }, //open settings on click
+      click: createSettingWindow
+    },
     {
       label: 'Help',
-      click: function () {
-        if (aboutWindow) {
-          aboutWindow.focus();
-          return;
-        }
-
-        aboutWindow = new BrowserWindow({
-          frame: false,
-          height: 230,
-          resizable: false,
-          width: 200
-        });
-
-        aboutWindow.loadURL('file://' + __dirname + '/app/about.html');
-
-        aboutWindow.on('closed', function () {
-          aboutWindow = null;
-        });
-      }
+      click: createAboutWindow
     },
     { type: 'separator' },
     { label: 'Quit', click: app.quit }
@@ -86,11 +55,13 @@ app.on('ready', function () {
   tray.setToolTip('Sound Machine')
   tray.setContextMenu(contextMenu)
 
-});
+}
+
+
+app.on('ready', createMainWindow);
 
 var settingsWindow = null;
-
-ipc.on('open-settings-window', function () {
+function createSettingWindow() {
   if (settingsWindow) {
     settingsWindow.focus();
     return;
@@ -103,16 +74,21 @@ ipc.on('open-settings-window', function () {
     width: 200
   });
 
-  settingsWindow.loadURL('file://' + __dirname + '/app/settings.html');
+  settingsWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'app/settings.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
 
   settingsWindow.on('closed', function () {
     settingsWindow = null;
   });
-});
+}
+
+ipc.on('open-settings-window', createSettingWindow);
 
 var aboutWindow = null;
-
-ipc.on('open-about-window', function () {
+function createAboutWindow() {
   if (aboutWindow) {
     aboutWindow.focus();
     return;
@@ -130,17 +106,21 @@ ipc.on('open-about-window', function () {
   aboutWindow.on('closed', function () {
     aboutWindow = null;
   });
-});
+}
+
+ipc.on('open-about-window', createAboutWindow);
 
 ipc.on('close-about-window', function () {
   if (aboutWindow) {
     aboutWindow.close();
+    aboutWindow = null;
   }
 });
 
 ipc.on('close-settings-window', function () {
   if (settingsWindow) {
     settingsWindow.close();
+    settingsWindow = null;
   }
 });
 
