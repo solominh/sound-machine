@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "main": "./main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package": "electron-packager . --out=./build/ SoundMachine --platform=win32 --arch=x64 --electronVersion=1.6.1 --asar=true --overwrite=true --icon=./app/img/app-icon.ico"
   },
   "devDependencies": {
-    "electron": "^1.4.15",
-    "electron-prebuilt": "^0.30.3"
+    "electron": "^1.6.1",
+    "electron-packager": "^8.5.2"
   },
   "dependencies": {
     "nconf": "^0.8.4",

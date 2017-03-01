@@ -50,6 +50,7 @@ closeEl.addEventListener('click', function () {
 });
 
 ipc.on('global-shortcut', function(event, arg) {
+    console.log(event);
     var event = new MouseEvent('click');
     soundButtons[arg].dispatchEvent(event);
 });
